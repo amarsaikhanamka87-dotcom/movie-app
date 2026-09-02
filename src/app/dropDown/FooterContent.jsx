@@ -6,7 +6,7 @@ export function FooterContent() {
    <div className="bg-[#4338ca] text-[#fafafa] w-screen h-90 p-10" >
     <div className="flex gap-250 p-10">
       <div className="flex flex-col gap-8">
-        <img className="bg-white" src="Logo (6).png"/>
+        <img  src="Logo (7).png"/>
         <p>© 2024 Movie Z. All Rights Reserved.</p>
       </div>
       <div className="flex gap-50">
