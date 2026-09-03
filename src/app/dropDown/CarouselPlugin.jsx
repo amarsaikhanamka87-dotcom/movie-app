@@ -35,7 +35,7 @@ export function CarouselPlugin() {
             options,
           );
           const data = await response.json();
-          setMovies(data.results);
+          setMovies(data.results.slice(0,3));
         } catch (error) {
           console.log("Something went wrong", error);
         }
@@ -66,7 +66,7 @@ className="w-full   h-250 object-cover" />
           <p>Now playing</p>
            <h1 className="text-4xl font-bold">{movie.original_title}</h1>
           <p className="flex gap-3">
-             <Star className=" text-yellow-500"/> {movie.vote_average}</p>
+             <Star className=" text-yellow-500"/> {movie.vote_average}/10</p>
          </div>
          <p >{movie.overview}</p>
          <button className="border w-50 rounded-2xl bg-white text-black">Watch Now</button>
