@@ -1,11 +1,9 @@
 "use client";
 
 import { CarouselPlugin } from "./dropDown/CarouselPlugin";
-import { Popular } from "./dropDown/Popular";
+import { Popular } from "./Popular";
 import { UpComing } from "./dropDown/UpComing";
 import { TopRated } from "./dropDown/TopRated";
-
-import { MovieList } from "./dropDown/MovieList";
 
 export default function Home() {
   return (
@@ -14,7 +12,6 @@ export default function Home() {
       <Popular />
       <UpComing />
       <TopRated />
-      <MovieList />
     </div>
   );
 }
