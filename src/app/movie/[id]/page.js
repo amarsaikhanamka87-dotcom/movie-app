@@ -43,7 +43,6 @@ export default function page() {
         console.log(data);
         setMovie(data);
 
-        setIsLoading(true);
         const resActors = await fetch(
           `https://api.themoviedb.org/3/movie/${id}/credits?language=en-US`,
           options,
@@ -62,7 +61,7 @@ export default function page() {
       } catch (error) {
         console.log("Something went wrong", error);
       } finally {
-        setIsLoading(true);
+        setIsLoading(false);
       }
     };
     fetchDataAsync();
@@ -146,14 +145,14 @@ export default function page() {
             <Skeleton className="h-8 w-250" />
           </div>
         ) : (
-          <p className="h-20 w-410 text-2xl mb-8">{movie.overview}</p>
+          <div className="h-20 w-410 text-2xl mb-8">{movie.overview}</div>
         )}
 
         <div className="flex flex-col gap-3">
           <div className="flex gap-5">
             <p className="text-3xl">Director :</p>
             {Directing?.slice(0, 3).map((d) => {
-              return <p className="p-2 ">{d.name}</p>;
+              return <div className="p-2 ">{d.name}</div>;
             })}
           </div>
           <SeparatorDemo />

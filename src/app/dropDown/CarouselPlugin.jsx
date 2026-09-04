@@ -12,12 +12,17 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel"
 import { Star} from "lucide-react"
+import { useRouter } from "next/navigation"
+
+import { Skeleton } from "@/components/ui/skeleton"
 
 
 
 export function CarouselPlugin() {
   const [movies, setMovies] = React.useState([]);
-  
+  const router = useRouter()
+
+  const [isLoading, setIsLoading] = React.useState(true)
     const options = {
       method: "GET",
       headers: {
@@ -38,6 +43,8 @@ export function CarouselPlugin() {
           setMovies(data.results.slice(0,3));
         } catch (error) {
           console.log("Something went wrong", error);
+        } finally {
+          setIsLoading(false)
         }
       };
       fetchUserDataAsync();
@@ -46,8 +53,11 @@ export function CarouselPlugin() {
   const plugin = React.useRef(
     Autoplay({ delay: 1000, stopOnInteraction: true })
   )
-
-  return (
+return ( <>
+ { isLoading ? (
+   <Skeleton className="w-screen h-200"/> 
+     ) :  (
+  
     <Carousel
       plugins={[plugin.current]}
   
@@ -57,7 +67,7 @@ export function CarouselPlugin() {
      <CarouselContent className="flex" >
       
         {movies.map((movie , index) => (
-          <CarouselItem key={index}>
+          <CarouselItem key={index} >
              <div className="relative w-full ">
             <img src={`https://image.tmdb.org/t/p/original${movie.backdrop_path}`  } 
 className="w-full   h-250 object-cover" />
@@ -69,7 +79,7 @@ className="w-full   h-250 object-cover" />
              <Star className=" text-yellow-500"/> {movie.vote_average}/10</p>
          </div>
          <p >{movie.overview}</p>
-         <button className="border w-50 rounded-2xl bg-white text-black">Watch Now</button>
+         <button className="border w-50 rounded-2xl bg-white text-black" onClick={()=>router.push(`/movie/${movie.id}`)}>Watch Now</button>
        </div>
      </div>
           </CarouselItem>
@@ -79,7 +89,43 @@ className="w-full   h-250 object-cover" />
       <CarouselPrevious />
       <CarouselNext />
     </Carousel>
-  )
+  )}
+  </>
+)
+  
+//   return (
+//     <Carousel
+//       plugins={[plugin.current]}
+  
+//       onMouseEnter={plugin.current.stop}
+//       onMouseLeave={plugin.current.reset}
+//     >
+//      <CarouselContent className="flex" >
+      
+//         {movies.map((movie , index) => (
+//           <CarouselItem key={index} >
+//              <div className="relative w-full ">
+//             <img src={`https://image.tmdb.org/t/p/original${movie.backdrop_path}`  } 
+// className="w-full   h-250 object-cover" />
+//       <div className="absolute left-30 bottom-80 w-80 h-80  text-white flex flex-col gap-5">
+//          <div className="flex flex-col gap-2">
+//           <p>Now playing</p>
+//            <h1 className="text-4xl font-bold">{movie.original_title}</h1>
+//           <p className="flex gap-3">
+//              <Star className=" text-yellow-500"/> {movie.vote_average}/10</p>
+//          </div>
+//          <p >{movie.overview}</p>
+//          <button className="border w-50 rounded-2xl bg-white text-black" onClick={()=>router.push(`/movie/${movie.id}`)}>Watch Now</button>
+//        </div>
+//      </div>
+//           </CarouselItem>
+//         ))}
+        
+//       </CarouselContent>
+//       <CarouselPrevious />
+//       <CarouselNext />
+//     </Carousel>
+//   )
 }
 
 
