@@ -5,7 +5,8 @@ import { SeparatorDemo } from "@/app/dropDown/SeparatorDemo";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { MoveRight, Star } from "lucide-react";
+import { MoveRight, Play, Star } from "lucide-react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -16,6 +17,8 @@ export default function page() {
   const [movie, setMovie] = useState({});
   const [actor, setActor] = useState();
   const [similarMovies, setSimilarMovie] = useState();
+  const [video, setVideo] = useState();
+
   const params = useParams();
   const movieId = params.id;
 
@@ -40,7 +43,7 @@ export default function page() {
           options,
         );
         const data = await response.json();
-        console.log(data);
+        //console.log(data);
         setMovie(data);
 
         const resActors = await fetch(
@@ -48,7 +51,7 @@ export default function page() {
           options,
         );
         const dataActors = await resActors.json();
-        console.log("dataActors", dataActors);
+        //console.log("dataActors", dataActors);
         setActor(dataActors);
 
         const responseSimilar = await fetch(
@@ -57,7 +60,16 @@ export default function page() {
         );
         const similarData = await responseSimilar.json();
         setSimilarMovie(similarData.results);
-        console.log("similarData", similarData.results);
+        // console.log("similarData", similarData.results);
+
+        const videoResponse = await fetch(
+          `https://api.themoviedb.org/3/movie/${id}/videos?language=en-US`,
+          //`${TMDB_BASE_URL}/movie/${id}?language=en-US&append_to_response=credits,videos,recommendations&api_key=${process.env.TMDB_API_KEY}`,
+        );
+
+        const videoData = await videoResponse.json();
+        console.log("videoData", videoData);
+        setVideo(videoData);
       } catch (error) {
         console.log("Something went wrong", error);
       } finally {
@@ -66,16 +78,21 @@ export default function page() {
     };
     fetchDataAsync();
   }, []);
-  console.log("similarMovie", similarMovies);
+  //console.log("similarMovie", similarMovies);
   const Writing = actor?.crew?.filter(
     (a) => a.known_for_department == "Writing",
   );
-  console.log("Writing", Writing);
+  // console.log("Writing", Writing);
 
   const Directing = actor?.crew?.filter(
     (p) => p.known_for_department == "Directing",
   );
-  console.log("Directing", Directing);
+  //console.log("Directing", Directing);
+
+  const handleBadge = (id) => {
+    router.push(`/genre?search=${id}`);
+    console.log("id", id);
+  };
 
   return (
     <div className="flex flex-col gap-10">
@@ -105,7 +122,7 @@ export default function page() {
             <Skeleton className="w-20 h-8" />
           ) : (
             <p className="flex gap-1.5">
-              <Star />
+              <Star className="fill-yellow-400" />
               {movie.vote_average}/10
             </p>
           )}
@@ -115,13 +132,28 @@ export default function page() {
         {isLoading ? (
           <Skeleton className="h-185 w-120" />
         ) : (
-          <img
-            src={`https://image.tmdb.org/t/p/original${movie.poster_path}`}
-            className=" h-185 "
-          />
+          <>
+            <img
+              src={`https://image.tmdb.org/t/p/original${movie.poster_path}`}
+              className=" h-185 relative"
+            />
+            {/* <a
+              href={`https://www.youtube.com/watch?v=${trailer.key}`}
+              target="_blank"
+              rel="noreferrer"
+              className="absolute bottom-5 left-5 z-10 flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm text-gray-950 hover:bg-gray-100"
+            > */}
+            <button
+              className="border absolute bottom-85 left-230 bg-white text-black rounded-4xl px-3 py-3 flex gap-2"
+              onClick={() => {}}
+            >
+              <Play /> Play trailer
+            </button>
+            {/* </a> */}
+          </>
         )}
         {isLoading ? (
-          <Skeleton className="h-185 w-320" />
+          <Skeleton className="h-185 " />
         ) : (
           <img
             src={`https://image.tmdb.org/t/p/original${movie.backdrop_path}`}
@@ -133,7 +165,11 @@ export default function page() {
         <div className="flex gap-2 ">
           {movie?.genres?.map((item) => {
             return (
-              <Badge key={item.id} className="text-[18px]">
+              <Badge
+                key={item.id}
+                className="text-[18px]"
+                onClick={() => handleBadge(item.id)}
+              >
                 {item.name}
               </Badge>
             );
@@ -152,21 +188,33 @@ export default function page() {
           <div className="flex gap-5">
             <p className="text-3xl">Director :</p>
             {Directing?.slice(0, 3).map((d) => {
-              return <div className="p-2 ">{d.name}</div>;
+              return (
+                <div className="p-2 " key={d.id}>
+                  {d.name}
+                </div>
+              );
             })}
           </div>
           <SeparatorDemo />
           <div className="flex gap-5 text-center">
             <p className="text-3xl">Writers :</p>
             {Writing?.slice(0, 3).map((a) => {
-              return <div className="p-2 ">{a.name}</div>;
+              return (
+                <div className="p-2 " key={a.id}>
+                  {a.name}
+                </div>
+              );
             })}
           </div>
           <SeparatorDemo />
           <div className="flex gap-5 text-center ">
             <p className="text-3xl">Stars :</p>
             {actor?.cast?.slice(0, 3).map((a) => {
-              return <div className="p-2 ">{a.name}</div>;
+              return (
+                <div className="p-2 " key={a.id}>
+                  {a.name}
+                </div>
+              );
             })}
           </div>
         </div>
@@ -181,9 +229,9 @@ export default function page() {
         ) : (
           <div className="flex  gap-350">
             <h1 className="text-4xl font-bold">More like this</h1>
-            <button className="flex gap-2">
+            <Link href="/movie/moreLike" className="flex gap-2">
               See more <MoveRight />
-            </button>
+            </Link>
           </div>
         )}
 
@@ -192,7 +240,7 @@ export default function page() {
             ? Array.from({ length: 6 }).map((_, i) => (
                 <Skeleton key={i} className="w-50 h-80" />
               ))
-            : similarMovies.slice(0, 6).map((sm) => (
+            : similarMovies?.slice(0, 6).map((sm) => (
                 <div
                   key={sm.id}
                   className="w-50  rounded-3xl p-0.8 flex flex-col gap-4  bg-gray-500"

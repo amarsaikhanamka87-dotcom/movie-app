@@ -60,7 +60,8 @@ export function DropdownMenuDemo() {
           return (
             <Badge
               className="m-1.5"
-              onClick={() => router.push(`/genre?search=${genre.name}`)}
+              onClick={() => router.push(`/genre?search=${genre.id}`)}
+              key={genre.id}
             >
               {genre.name}
             </Badge>
@@ -70,3 +71,4 @@ export function DropdownMenuDemo() {
     </DropdownMenu>
   );
 }
+//<Badge>{MOVIE.name}</

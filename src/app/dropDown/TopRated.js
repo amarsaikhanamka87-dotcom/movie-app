@@ -3,10 +3,11 @@ import { useEffect, useState } from "react";
 import { MovieCard } from "./MovieCard";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
 
 export function TopRated() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState();
+  const [isLoading, setIsLoading] = useState(true);
   const [movies, setMovies] = useState([]);
   const options = {
     method: "GET",
@@ -41,9 +42,12 @@ export function TopRated() {
       <div className="flex justify-between">
         {" "}
         <h1 className="font-heading  text-3xl p-5">TopRated</h1>
-        <button className="flex gap-2 border rounded-2xl m-5 p-2">
+        <Link
+          href="/movie/TopRated"
+          className="flex gap-2 border rounded-2xl m-5 p-2"
+        >
           See more <MoveRight />
-        </button>
+        </Link>
       </div>
       <div className="grid grid-cols-6 gap-8">
         {isLoading
@@ -53,7 +57,7 @@ export function TopRated() {
           : movies.map((movie) => (
               <div
                 key={movie.id}
-                className="w-50 rounded-3xl p-0.8 flex flex-col gap-4 bg-gray-500"
+                className="w-50 rounded-3xl p-0.8 flex flex-col gap-4 bg-gray-300"
                 onClick={() => router.push(`/movie/${movie.id}`)}
               >
                 <MovieCard

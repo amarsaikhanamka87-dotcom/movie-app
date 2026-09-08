@@ -1,22 +1,21 @@
 "use client";
 
-import { Skeleton } from "@/components/ui/skeleton";
-import { MoveRight } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { MovieCard } from "@/app/dropDown/MovieCard";
+import { PaginationDemo } from "@/app/dropDown/PaginationDemo";
 import { useEffect, useState } from "react";
-import { MovieCard } from "./dropDown/MovieCard";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-export function Popular() {
-  const [movies, setMovies] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+export default function Page() {
+  const [movies, setMovies] = useState();
+  const [isLoading, setIsLoading] = useState();
+  const [page, setPage] = useState(1);
   const router = useRouter();
+
   const options = {
     method: "GET",
     headers: {
       accept: "application/json",
-      Authorization:
-        "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJkNjdkOGJlYmQwZjRmZjM0NWY2NTA1Yzk5ZTlkMDI4OSIsIm5iZiI6MTc0MjE3NTA4OS4zODksInN1YiI6IjY3ZDc3YjcxODVkMTM5MjFiNTAxNDE1ZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.KxFMnZppBdHUSz_zB4p9A_gRD16I_R6OX1oiEe0LbE8",
+      Authorization: "Bearer" + process.env.ACCESS_TOKEN,
     },
   };
 
@@ -24,38 +23,37 @@ export function Popular() {
     const fetchUserDataAsync = async () => {
       try {
         const response = await fetch(
-          "https://api.themoviedb.org/3/movie/popular?language=en-US&page=1&api-key",
+          `https://api.themoviedb.org/3/movie/top_rated?page=${page}`,
           options,
         );
         const data = await response.json();
-        setMovies(data.results.slice(0, 12));
+        setMovies(data.results);
       } catch (error) {
         console.log("Something went wrong", error);
-      } finally {
-        setIsLoading(false);
       }
     };
     fetchUserDataAsync();
-  }, []);
+  }, [page]);
+
+  const handlePrevious = () => {
+    if (page === 1) return;
+    setPage(page - 1);
+  };
+
+  const handleNext = () => {
+    setPage(page + 1);
+  };
 
   return (
     <div>
-      <div className="flex justify-between">
-        {" "}
-        <h1 className="font-heading  text-3xl p-5">Popular</h1>
-        <Link
-          href="/movie/Popular"
-          className="flex gap-2 border rounded-2xl m-5 p-2"
-        >
-          See more <MoveRight />
-        </Link>
-      </div>
+      <h1 className="font-heading  text-3xl p-5">Popular</h1>
+
       <div className="grid grid-cols-6 gap-8">
         {isLoading
           ? Array.from({ length: 12 }).map((_, i) => (
               <Skeleton key={i} className="w-50 h-80" />
             ))
-          : movies.map((movie) => (
+          : movies?.map((movie) => (
               <div
                 key={movie.id}
                 className="w-50 rounded-3xl p-0.8 flex flex-col gap-4 bg-gray-300"
@@ -69,6 +67,15 @@ export function Popular() {
                 />
               </div>
             ))}
+      </div>
+      <div className="flex gap-5  justify-center m-10 ">
+        <button onClick={handlePrevious} className="border p-3 rounded-2xl">
+          Previous
+        </button>
+        <div className=" p-3"> {page} </div>
+        <button onClick={handleNext} className="border p-3 rounded-2xl">
+          next
+        </button>
       </div>
     </div>
   );
