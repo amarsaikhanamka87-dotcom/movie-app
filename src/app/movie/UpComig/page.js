@@ -1,7 +1,7 @@
 "use client";
 
 import { MovieCard } from "@/app/dropDown/MovieCard";
-import { PaginationDemo } from "@/app/dropDown/PaginationDemo";
+
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -15,7 +15,8 @@ export default function Page() {
   const options = {
     method: "GET",
     headers: {
-      Authorization: "Bearer" + process.env.ACCESS_TOKEN,
+      Authorization:
+        "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJkNjdkOGJlYmQwZjRmZjM0NWY2NTA1Yzk5ZTlkMDI4OSIsIm5iZiI6MTc0MjE3NTA4OS4zODksInN1YiI6IjY3ZDc3YjcxODVkMTM5MjFiNTAxNDE1ZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.KxFMnZppBdHUSz_zB4p9A_gRD16I_R6OX1oiEe0LbE8",
     },
   };
 
@@ -27,7 +28,7 @@ export default function Page() {
           options,
         );
         const data = await response.json();
-        setMovies(data.results);
+        setMovies(data.results.splice(0, 12));
       } catch (error) {
         console.log("Something went wrong", error);
       }

@@ -2,9 +2,19 @@
 
 import { Badge, ChevronRight, MoveRightIcon, X, XIcon } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MovieCard } from "../dropDown/MovieCard";
 import { Separator } from "@/components/ui/separator";
+
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const options = {
   method: "GET",
@@ -19,45 +29,80 @@ export default function Page() {
   const [movies, setMovies] = useState();
   const [genreList, setGenreList] = useState();
   const router = useRouter();
-  const [clicked, setClicked] = useState();
+
   const [title, setTitle] = useState();
 
+  const [page, setPage] = useState(1);
   const searchParams = useSearchParams();
+  const searchId = searchParams.get("search");
 
-  const genreIds = searchParams.get("search");
+  const [num, setNum] = useState();
+
+  const genreIds = searchParams.get("search").split(",").map(Number);
+
+  const [pageNum, setPageNum] = useState();
 
   useEffect(() => {
     const fetchUserDataAsync = async () => {
       try {
-        const genreRes = await fetch(
-          `https://api.themoviedb.org/3/discover/movie?language=en&with_genres=${genreIds}&page=1`,
-          options,
-        );
-        const genreData = await genreRes.json();
-        setMovies(genreData.results);
-        console.log("genreData", genreData);
-
         const genreListRes = await fetch(
           `https://api.themoviedb.org/3/genre/movie/list?language=en`,
           options,
         );
         const genreListData = await genreListRes.json();
         setGenreList(genreListData.genres);
-        console.log("genreListData", genreListData.genres);
+        setPageNum(genreListData.total_pages);
+
+        const genreRes = await fetch(
+          `https://api.themoviedb.org/3/discover/movie?language=en&with_genres=${genreIds.join(",")}&page=${page}`,
+          options,
+        );
+        const genreData = await genreRes.json();
+        setMovies(genreData.results);
+        setNum(genreData.total_results);
       } catch (error) {
         console.log("Something went wrong", error);
       }
     };
     fetchUserDataAsync();
-  }, []);
+  }, [genreIds, page]);
 
-  const handleClick = (id, name) => {
-    setClicked(id);
-    router.push(`/genre?search=${id}`);
-    setTitle(name);
-    setMovies(movies);
+  const titleDisplay = useMemo(() => {
+    return genreList
+      ?.filter((g) => genreIds.includes(g.id))
+      .map((g) => g.name)
+      .join(", ");
+  }, [genreList, genreIds]);
+
+  const handlePrevious = () => {
+    if (page === 1) return;
+    setPage(page - 1);
   };
 
+  const handleNext = () => {
+    if (num == 0) return;
+    if (page == pageNum) return;
+    setPage(page + 1);
+  };
+
+  const handleClick = (id) => {
+    if (genreIds.includes(id)) return;
+    router.push(`/genre?search=${searchId},${id}`);
+
+    setPage(1);
+  };
+
+  const handleX = (e, id) => {
+    e.stopPropagation(); // Stops the parent div trigger event
+    const updatedIds = genreIds.filter((genreId) => genreId !== id);
+
+    if (updatedIds.length === 0) {
+      return;
+    } else {
+      router.push(`/genre?search=${updatedIds.join(",")}`);
+    }
+    setPage(1);
+  };
   return (
     <div className="flex flex-col gap-20">
       <h1 className="text-5xl font-bold ">Search filter</h1>
@@ -73,22 +118,29 @@ export default function Page() {
               return (
                 <div
                   key={genre.id}
-                  className={`border rounded-2xl px-5 w-fit m-1.5 flex gap-2 ${clicked === genre.id ? `bg-black text-white ` : ``} `}
-                  onClick={() => handleClick(genre.id, genre.name)}
+                  className={`border rounded-2xl px-5 w-fit m-1.5 flex gap-2 ${genreIds.includes(genre.id) ? `bg-black text-white ` : ``}} `}
+                  onClick={() => handleClick(genre.id)}
                 >
                   {genre.name}
-                  {clicked === genre.id ? <X /> : <ChevronRight />}
+                  {genreIds.includes(genre.id) ? (
+                    <X
+                      onClick={(e) => handleX(e, genre.id)}
+                      className="cursor-pointer"
+                    />
+                  ) : (
+                    <ChevronRight />
+                  )}
                 </div>
               );
             })}
           </div>
         </div>
-        <div className="flex flex-col gap-10">
+        <div className="flex flex-col gap-15">
           <h1 className="text-4xl font-bold">
-            {movies?.length} titles in {title}
+            {num} titles in "{titleDisplay}"
           </h1>
           <div className=" w-250  grid grid-cols-4 gap-5">
-            {movies?.map((movie) => {
+            {movies?.slice(0, 8).map((movie) => {
               return (
                 <div
                   className=" border rounded-2xl bg-gray-300"
@@ -104,6 +156,17 @@ export default function Page() {
               );
             })}
           </div>
+          <Pagination>
+            <PaginationContent>
+              <PaginationPrevious onClick={handlePrevious} />
+              <PaginationItem className="">
+                <PaginationLink href="#">{page}</PaginationLink>
+              </PaginationItem>
+              <PaginationEllipsis />
+
+              <PaginationNext onClick={handleNext} />
+            </PaginationContent>
+          </Pagination>
         </div>
       </div>
     </div>

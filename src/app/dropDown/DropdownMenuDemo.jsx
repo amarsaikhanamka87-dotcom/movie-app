@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const options = {
@@ -24,7 +24,10 @@ const options = {
 export function DropdownMenuDemo() {
   const router = useRouter();
   const [genreList, setGenreList] = useState();
-
+  const [clicked, setClicked] = useState(true);
+  const searchParams = useSearchParams(0);
+  const searchId = searchParams.get("search");
+  //console.log("searchId", searchId);
   useEffect(() => {
     const fetchUserDataAsync = async () => {
       try {
@@ -42,6 +45,10 @@ export function DropdownMenuDemo() {
   }, []);
 
   //console.log("list", genreList);
+  const handleGenreClick = (id) => {
+    const nextSearch = searchId ? `${searchId},${id}` : id;
+    router.push(`/genre?search=${nextSearch}`);
+  };
 
   return (
     <DropdownMenu>
@@ -56,11 +63,12 @@ export function DropdownMenuDemo() {
       <DropdownMenuContent className="w-100 m-5   ">
         <h1>Genres</h1>
         <p>See lists of movies by genre</p>
+
         {genreList?.map((genre) => {
           return (
             <Badge
               className="m-1.5"
-              onClick={() => router.push(`/genre?search=${genre.id}`)}
+              onClick={() => handleGenreClick(genre.id)}
               key={genre.id}
             >
               {genre.name}

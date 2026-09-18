@@ -1,11 +1,18 @@
 "use client";
 
+import { DialogDemo } from "@/app/dropDown/DialogDemo";
 import { MovieCard } from "@/app/dropDown/MovieCard";
 import { SeparatorDemo } from "@/app/dropDown/SeparatorDemo";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { MoveRight, Play, Star } from "lucide-react";
+import { Key, MoveRight, Play, Star } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
@@ -17,7 +24,7 @@ export default function page() {
   const [movie, setMovie] = useState({});
   const [actor, setActor] = useState();
   const [similarMovies, setSimilarMovie] = useState();
-  const [video, setVideo] = useState();
+  const [trailerKey, setTrailerKey] = useState(null);
 
   const params = useParams();
   const movieId = params.id;
@@ -25,6 +32,7 @@ export default function page() {
   const { id } = useParams();
 
   const [isLoading, setIsLoading] = useState(true);
+
   const options = {
     method: "GET",
 
@@ -43,7 +51,7 @@ export default function page() {
           options,
         );
         const data = await response.json();
-        //console.log(data);
+        //console.log(" movie data", data);
         setMovie(data);
 
         const resActors = await fetch(
@@ -61,15 +69,6 @@ export default function page() {
         const similarData = await responseSimilar.json();
         setSimilarMovie(similarData.results);
         // console.log("similarData", similarData.results);
-
-        const videoResponse = await fetch(
-          `https://api.themoviedb.org/3/movie/${id}/videos?language=en-US`,
-          //`${TMDB_BASE_URL}/movie/${id}?language=en-US&append_to_response=credits,videos,recommendations&api_key=${process.env.TMDB_API_KEY}`,
-        );
-
-        const videoData = await videoResponse.json();
-        console.log("videoData", videoData);
-        setVideo(videoData);
       } catch (error) {
         console.log("Something went wrong", error);
       } finally {
@@ -78,6 +77,37 @@ export default function page() {
     };
     fetchDataAsync();
   }, []);
+
+  useEffect(() => {
+    const fetchTrailerKey = async () => {
+      if (!movieId) return;
+      try {
+        const endpoint = `https://api.themoviedb.org/3/movie/${movieId}/videos?language=en-US`;
+
+        const response = await fetch(endpoint, {
+          method: "GET",
+          headers: {
+            accept: "application/json",
+            Authorization:
+              "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJmYTkyMTk2OTJlMmI4M2U0NjViZWUzODhmY2RlZWRkOCIsIm5iZiI6MTc2MzQyOTQ5Ni4zOTEsInN1YiI6IjY5MWJjYzc4YmQ0ZjI0N2UxYTE3NjBiNiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.z6ZK-29-4pUnr48N5xmQ13lNyqFSFKnys3tWUKasT84",
+          },
+        });
+
+        const data = await response.json();
+
+        console.log("Trailer", data);
+
+        setTrailerKey(
+          data?.results?.find((item) => item.type === "Trailer")?.key,
+        );
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchTrailerKey();
+  }, [movieId]);
+
   //console.log("similarMovie", similarMovies);
   const Writing = actor?.crew?.filter(
     (a) => a.known_for_department == "Writing",
@@ -137,19 +167,32 @@ export default function page() {
               src={`https://image.tmdb.org/t/p/original${movie.poster_path}`}
               className=" h-185 relative"
             />
-            {/* <a
-              href={`https://www.youtube.com/watch?v=${trailer.key}`}
-              target="_blank"
-              rel="noreferrer"
-              className="absolute bottom-5 left-5 z-10 flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm text-gray-950 hover:bg-gray-100"
-            > */}
-            <button
-              className="border absolute bottom-85 left-230 bg-white text-black rounded-4xl px-3 py-3 flex gap-2"
-              onClick={() => {}}
-            >
-              <Play /> Play trailer
-            </button>
-            {/* </a> */}
+
+            <Dialog>
+              <DialogTrigger asChild>
+                <button className="border absolute bottom-55 left-200 bg-white text-black rounded-4xl px-3 py-3 flex gap-2">
+                  Play Video
+                </button>
+              </DialogTrigger>
+
+              <DialogContent
+                showCloseButton={false}
+                className="sm:max-w-[800px] p-0 bg-transparent border-none"
+              >
+                <div className="aspect-video w-full">
+                  {trailerKey && (
+                    <iframe
+                      src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1`}
+                      title="YouTube video player"
+                      className="w-full h-full border-0 block"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      allowFullScreen
+                    ></iframe>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
           </>
         )}
         {isLoading ? (
@@ -229,7 +272,7 @@ export default function page() {
         ) : (
           <div className="flex  gap-350">
             <h1 className="text-4xl font-bold">More like this</h1>
-            <Link href="/movie/moreLike" className="flex gap-2">
+            <Link href={`/movie/${id}/moreLike`} className="flex gap-2">
               See more <MoveRight />
             </Link>
           </div>

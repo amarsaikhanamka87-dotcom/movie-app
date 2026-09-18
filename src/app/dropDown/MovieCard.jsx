@@ -10,6 +10,7 @@ export function MovieCard({ img, title, rating }) {
         <Star className="fill-yellow-400" />
         {rating}/10
       </div>
+      <h1>{}</h1>
     </div>
   );
 }
