@@ -2,7 +2,7 @@
 
 import { Badge, ChevronRight, MoveRightIcon, X, XIcon } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { MovieCard } from "../dropDown/MovieCard";
 import { Separator } from "@/components/ui/separator";
 
@@ -104,71 +104,73 @@ export default function Page() {
     setPage(1);
   };
   return (
-    <div className="flex flex-col gap-20">
-      <h1 className="text-5xl font-bold ">Search filter</h1>
+    <Suspense fallback={<div>Loading genres...</div>}>
+      <div className="flex flex-col gap-20">
+        <h1 className="text-5xl font-bold ">Search filter</h1>
 
-      <div className="flex  gap-50">
-        <div>
-          <div className="flex flex-col gap-5 text-3xl">
-            <h1 className="font-bold ">Genres</h1>
-            <p>See lists of movies by genre</p>
+        <div className="flex  gap-50">
+          <div>
+            <div className="flex flex-col gap-5 text-3xl">
+              <h1 className="font-bold ">Genres</h1>
+              <p>See lists of movies by genre</p>
+            </div>
+            <div className="grid grid-cols-4  mt-5">
+              {genreList?.map((genre) => {
+                return (
+                  <div
+                    key={genre.id}
+                    className={`border rounded-2xl px-5 w-fit m-1.5 flex gap-2 ${genreIds.includes(genre.id) ? `bg-black text-white ` : ``}} `}
+                    onClick={() => handleClick(genre.id)}
+                  >
+                    {genre.name}
+                    {genreIds.includes(genre.id) ? (
+                      <X
+                        onClick={(e) => handleX(e, genre.id)}
+                        className="cursor-pointer"
+                      />
+                    ) : (
+                      <ChevronRight />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          <div className="grid grid-cols-4  mt-5">
-            {genreList?.map((genre) => {
-              return (
-                <div
-                  key={genre.id}
-                  className={`border rounded-2xl px-5 w-fit m-1.5 flex gap-2 ${genreIds.includes(genre.id) ? `bg-black text-white ` : ``}} `}
-                  onClick={() => handleClick(genre.id)}
-                >
-                  {genre.name}
-                  {genreIds.includes(genre.id) ? (
-                    <X
-                      onClick={(e) => handleX(e, genre.id)}
-                      className="cursor-pointer"
+          <div className="flex flex-col gap-15">
+            <h1 className="text-4xl font-bold">
+              {num} titles in "{titleDisplay}"
+            </h1>
+            <div className=" w-250  grid grid-cols-4 gap-5">
+              {movies?.slice(0, 8).map((movie) => {
+                return (
+                  <div
+                    className=" border rounded-2xl bg-gray-300"
+                    onClick={() => router.push(`/movie/${movie.id}`)}
+                    key={movie.id}
+                  >
+                    <MovieCard
+                      img={`https://image.tmdb.org/t/p/original${movie.poster_path}`}
+                      title={movie.title}
+                      rating={movie.vote_average}
                     />
-                  ) : (
-                    <ChevronRight />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-        <div className="flex flex-col gap-15">
-          <h1 className="text-4xl font-bold">
-            {num} titles in "{titleDisplay}"
-          </h1>
-          <div className=" w-250  grid grid-cols-4 gap-5">
-            {movies?.slice(0, 8).map((movie) => {
-              return (
-                <div
-                  className=" border rounded-2xl bg-gray-300"
-                  onClick={() => router.push(`/movie/${movie.id}`)}
-                  key={movie.id}
-                >
-                  <MovieCard
-                    img={`https://image.tmdb.org/t/p/original${movie.poster_path}`}
-                    title={movie.title}
-                    rating={movie.vote_average}
-                  />
-                </div>
-              );
-            })}
-          </div>
-          <Pagination>
-            <PaginationContent>
-              <PaginationPrevious onClick={handlePrevious} />
-              <PaginationItem className="">
-                <PaginationLink href="#">{page}</PaginationLink>
-              </PaginationItem>
-              <PaginationEllipsis />
+                  </div>
+                );
+              })}
+            </div>
+            <Pagination>
+              <PaginationContent>
+                <PaginationPrevious onClick={handlePrevious} />
+                <PaginationItem className="">
+                  <PaginationLink href="#">{page}</PaginationLink>
+                </PaginationItem>
+                <PaginationEllipsis />
 
-              <PaginationNext onClick={handleNext} />
-            </PaginationContent>
-          </Pagination>
+                <PaginationNext onClick={handleNext} />
+              </PaginationContent>
+            </Pagination>
+          </div>
         </div>
       </div>
-    </div>
+    </Suspense>
   );
 }

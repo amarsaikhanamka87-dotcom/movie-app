@@ -80,70 +80,72 @@ export default function Page() {
   };
 
   return (
-    <div className="flex gap-50 ">
-      <div className="flex flex-col gap-10">
-        <h1 className="text-5xl font-black">Search result </h1>
-        <div className="flex flex-col gap-5">
-          <h1 className="text-2xl font-heading">
-            {num} results for "{searchValue}"
-          </h1>
-        </div>
-        {num == 0 ? (
-          <div className="text-center text-black border w-150 h-50 p-24">
-            No results found
+    <Suspense fallback={<div>Loading genres...</div>}>
+      <div className="flex gap-50 ">
+        <div className="flex flex-col gap-10">
+          <h1 className="text-5xl font-black">Search result </h1>
+          <div className="flex flex-col gap-5">
+            <h1 className="text-2xl font-heading">
+              {num} results for "{searchValue}"
+            </h1>
           </div>
-        ) : (
-          <div className="grid grid-cols-5 gap-5">
-            {movies?.map((movie) => {
+          {num == 0 ? (
+            <div className="text-center text-black border w-150 h-50 p-24">
+              No results found
+            </div>
+          ) : (
+            <div className="grid grid-cols-5 gap-5">
+              {movies?.map((movie) => {
+                return (
+                  <div
+                    key={movie?.id}
+                    className="w-50 rounded-3xl p-0.8 flex flex-col gap-4 bg-gray-300"
+                    onClick={() => router.push(`/movie/${movie.id}`)}
+                  >
+                    <MovieCard
+                      img={`https://image.tmdb.org/t/p/original${movie.poster_path}`}
+                      title={movie.original_title}
+                      rating={movie.vote_average}
+                      id={movie.id}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <Pagination>
+            <PaginationContent>
+              <PaginationPrevious onClick={handlePrevious} />
+              <PaginationItem className="">
+                <PaginationLink href="#">{page}</PaginationLink>
+              </PaginationItem>
+              <PaginationEllipsis />
+
+              <PaginationNext onClick={handleNext} />
+            </PaginationContent>
+          </Pagination>
+        </div>
+        <div className="flex  bg-gray-200 h-250 w-0.5"></div>
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-5">
+            <h1 className="text-3xl font-black">Search by genre</h1>
+            <p className="text-2xl">See list's of movies by genre</p>
+          </div>
+          <div className="w-100">
+            {list?.map((l) => {
               return (
-                <div
-                  key={movie?.id}
-                  className="w-50 rounded-3xl p-0.8 flex flex-col gap-4 bg-gray-300"
-                  onClick={() => router.push(`/movie/${movie.id}`)}
+                <Badge
+                  className="m-2"
+                  onClick={() => router.push(`/genre?search=${l.id}`)}
                 >
-                  <MovieCard
-                    img={`https://image.tmdb.org/t/p/original${movie.poster_path}`}
-                    title={movie.original_title}
-                    rating={movie.vote_average}
-                    id={movie.id}
-                  />
-                </div>
+                  {l.name} <ChevronRight />
+                </Badge>
               );
             })}
           </div>
-        )}
-
-        <Pagination>
-          <PaginationContent>
-            <PaginationPrevious onClick={handlePrevious} />
-            <PaginationItem className="">
-              <PaginationLink href="#">{page}</PaginationLink>
-            </PaginationItem>
-            <PaginationEllipsis />
-
-            <PaginationNext onClick={handleNext} />
-          </PaginationContent>
-        </Pagination>
-      </div>
-      <div className="flex  bg-gray-200 h-250 w-0.5"></div>
-      <div className="flex flex-col gap-5">
-        <div className="flex flex-col gap-5">
-          <h1 className="text-3xl font-black">Search by genre</h1>
-          <p className="text-2xl">See list's of movies by genre</p>
-        </div>
-        <div className="w-100">
-          {list?.map((l) => {
-            return (
-              <Badge
-                className="m-2"
-                onClick={() => router.push(`/genre?search=${l.id}`)}
-              >
-                {l.name} <ChevronRight />
-              </Badge>
-            );
-          })}
         </div>
       </div>
-    </div>
+    </Suspense>
   );
 }

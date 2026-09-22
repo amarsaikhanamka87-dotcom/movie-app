@@ -3,6 +3,7 @@ import "./globals.css";
 import { Heading } from "./component/Heading";
 import { FooterContent } from "./Footer/FooterContent";
 import { ThemeProvider } from "./dropDown/ThemeProvider";
+import { Suspense } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,16 +27,18 @@ export default function RootLayout({ children }) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col items-center gap-20">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Heading />
-          {children}
-          <FooterContent />
-        </ThemeProvider>
+        <Suspense fallback={<div>Loading search...</div>}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Heading />
+            {children}
+            <FooterContent />
+          </ThemeProvider>
+        </Suspense>
       </body>
     </html>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { DropdownMenuDemo } from "../dropDown/DropdownMenuDemo";
 import { ModeToggle } from "../dropDown/ModeToggle";
 import { useRouter } from "next/navigation";
@@ -49,46 +49,48 @@ export function Heading() {
     fetchPopular();
   }, [searchValue]);
   return (
-    <div className="flex w-500 justify-between mt-10">
-      <div onClick={() => router.push(`/`)}>
-        <img src="/Logo (6).png" alt="Logo" />
-      </div>
+    <Suspense fallback={<div>Loading search...</div>}>
+      <div className="flex w-500 justify-between mt-10">
+        <div onClick={() => router.push(`/`)}>
+          <img src="/Logo (6).png" alt="Logo" />
+        </div>
 
-      <div className="flex gap-3">
-        <DropdownMenuDemo />
-        <div className="flex flex-col ">
-          <input
-            value={searchValue}
-            type="text"
-            placeholder="Search ... "
-            className="border w-150 rounded-2xl px-5"
-            onChange={handleChange}
-            onKeyDown={handleEnter}
-          />
-          <div className="flex flex-col gap-1.5 p-5">
-            {movie?.map((m) => {
-              return (
-                <div className="flex gap-2  ">
-                  <img
-                    className="w-15 h-20 "
-                    src={`https://image.tmdb.org/t/p/original${m.poster_path}`}
-                  />
-                  <div className="border flex  w-100 justify-between items-center">
-                    {m.original_title}
-                    <div className="flex ">
-                      <Star className="fill-amber-300" />
-                      {m.vote_average}/10
+        <div className="flex gap-3">
+          <DropdownMenuDemo />
+          <div className="flex flex-col ">
+            <input
+              value={searchValue}
+              type="text"
+              placeholder="Search ... "
+              className="border w-150 rounded-2xl px-5"
+              onChange={handleChange}
+              onKeyDown={handleEnter}
+            />
+            <div className="flex flex-col gap-1.5 p-5">
+              {movie?.map((m) => {
+                return (
+                  <div className="flex gap-2  ">
+                    <img
+                      className="w-15 h-20 "
+                      src={`https://image.tmdb.org/t/p/original${m.poster_path}`}
+                    />
+                    <div className="border flex  w-100 justify-between items-center">
+                      {m.original_title}
+                      <div className="flex ">
+                        <Star className="fill-amber-300" />
+                        {m.vote_average}/10
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
+        <div>
+          <ModeToggle />
+        </div>
       </div>
-      <div>
-        <ModeToggle />
-      </div>
-    </div>
+    </Suspense>
   );
 }
